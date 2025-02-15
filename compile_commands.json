@@ -24,5 +24,18 @@
     "directory": "/home/john/repos/CTagLib",
     "file": "/home/john/repos/CTagLib/src/main.c",
     "output": "/home/john/repos/CTagLib/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/strutils.o",
+      "src/strutils.c"
+    ],
+    "directory": "/home/john/repos/CTagLib",
+    "file": "/home/john/repos/CTagLib/src/strutils.c",
+    "output": "/home/john/repos/CTagLib/build/strutils.o"
   }
 ]

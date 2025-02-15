@@ -35,7 +35,6 @@ void ID3readTags(ID3FileRef fileref, ID3Tag *tag[]) {
   unsigned char *buffer;
   uint16_t *data = calloc(1, 1024);
   char *utf8data = calloc(1, 1024);
-  ENDS end;
 
   fseek(fp, HEADER_SIZE, SEEK_SET);
   while(bytes_read < fileref.header.size) {
@@ -45,11 +44,13 @@ void ID3readTags(ID3FileRef fileref, ID3Tag *tag[]) {
       fprintf(stderr, "Is not a header, closing...\n");
       return;
     }
+		if(strcmp((char *)buffer, "") == 0)
+			continue;
 
     frame_size = ID3_sync_safe_to_int32(&buffer[4]);
     printf("%s: %d\n", buffer, frame_size);
     bytes_read += from_tag = fread(buffer, 1, frame_size, fp);
-    if(frame_size < 4096 && (int)buffer[1] == 0xFE) {
+    if(frame_size < 4096 && ((int)buffer[1] == 0xFE || (int)buffer[1] == 0xFF)) {
       memcpy(data, buffer, frame_size);
       data++;
       if(data[0] == 0xFEFF)
@@ -57,8 +58,8 @@ void ID3readTags(ID3FileRef fileref, ID3Tag *tag[]) {
       if(data[0] == 0xFF)
         data++;
       rframe_size = frame_size;
-      endianness(data, &rframe_size, &end);
-      ID3utf16_to_ut1f8(data, rframe_size, utf8data);
+      int endianness = detect_endianness(data, &rframe_size);
+      ID3utf16_to_utf8(data, rframe_size, utf8data, endianness);
     } else {
       strcpy(utf8data, (char *)buffer);
     }

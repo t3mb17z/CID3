@@ -9,7 +9,7 @@ typedef enum {
 	LITTLE_END,
 } ENDS;
 
-uint16_t *endianness(uint16_t *text, size_t *size, ENDS *endianness);
-size_t ID3utf16_to_ut1f8(uint16_t *utf16, size_t utf16len, char *utf8);
+int detect_endianness(uint16_t *text, size_t *size);
+size_t ID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char *utf8, int isbigend);
 
 #endif
