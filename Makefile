@@ -5,6 +5,7 @@ TARGET = program
 SRC_DIR = src
 BUILD_DIR = build
 INC_DIRS = -Iinclude
+LIB = false
 
 # Archivos fuente y objetos
 SRCS = $(wildcard $(SRC_DIR)/*.c)

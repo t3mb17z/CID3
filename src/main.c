@@ -3,16 +3,13 @@
 
 int main(int argc, char *argv[]) {
 
-	if(argc < 2) {
-		fprintf(stderr, "Needs argument to work");
-		return 1;
-	}
-
-	ID3FileRef fileref;
+	ID3FileRef file;
 	ID3Header header;
-	ID3Tag *tags;
+	ID3TagCollection tags;
 
-	ID3readFile(argv[1], &fileref, &header, &tags);
+	ID3readFile(argv[1], &file, &header, &tags);
 
+	printf("Title: %s", file.tags.title.text);
+	
 	return 0;
 }

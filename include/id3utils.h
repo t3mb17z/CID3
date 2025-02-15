@@ -15,24 +15,25 @@ typedef struct {
 typedef struct {
 	char id[5];
 	int size;
-	int encoding;
 	char *text;
 } ID3Tag;
 
 typedef struct {
 	ID3Tag title;
-} TagCollection;
+	ID3Tag album;
+	ID3Tag artist;
+} ID3TagCollection;
 
 typedef struct {
 	char *name;
 	char *parent;
 	char *full_path;
 	ID3Header header;
-	ID3Tag tags[6];
+	ID3TagCollection tags;
 } ID3FileRef;
 
-void ID3readTags(ID3FileRef fileref, ID3Tag **tag);
+void ID3readTags(ID3FileRef fileref, ID3TagCollection *tag);
 void ID3readHeader(ID3FileRef fileref, ID3Header *header);
-void ID3readFile(const char *path, ID3FileRef *fileref, ID3Header *header, ID3Tag *tags[]);
+void ID3readFile(const char *path, ID3FileRef *fileref, ID3Header *header, ID3TagCollection *tags);
 
 #endif

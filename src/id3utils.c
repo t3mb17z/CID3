@@ -23,7 +23,7 @@ int ID3_sync_safe_to_int32(unsigned char *syncsafe) {
   );
 };
 
-void ID3readTags(ID3FileRef fileref, ID3Tag *tag[]) {
+void ID3readTags(ID3FileRef fileref, ID3TagCollection *tags) {
   FILE *fp = fopen(fileref.full_path, "rb");
   if(fp == NULL) {
     perror("fopen");
@@ -34,7 +34,7 @@ void ID3readTags(ID3FileRef fileref, ID3Tag *tag[]) {
   size_t from_tag = 0, header = 0, rframe_size;
   unsigned char *buffer;
   uint16_t *data = calloc(1, 1024);
-  char *utf8data = calloc(1, 1024);
+  ID3Tag result;
 
   fseek(fp, HEADER_SIZE, SEEK_SET);
   while(bytes_read < fileref.header.size) {
@@ -47,8 +47,14 @@ void ID3readTags(ID3FileRef fileref, ID3Tag *tag[]) {
 		if(strcmp((char *)buffer, "") == 0)
 			continue;
 
+    strncpy(result.id, (char *)buffer, 4);
+    result.id[4] = '\0';
+
     frame_size = ID3_sync_safe_to_int32(&buffer[4]);
-    printf("%s: %d\n", buffer, frame_size);
+
+    result.size = frame_size;
+    result.text = calloc(1, 256);
+    
     bytes_read += from_tag = fread(buffer, 1, frame_size, fp);
     if(frame_size < 4096 && ((int)buffer[1] == 0xFE || (int)buffer[1] == 0xFF)) {
       memcpy(data, buffer, frame_size);
@@ -59,18 +65,19 @@ void ID3readTags(ID3FileRef fileref, ID3Tag *tag[]) {
         data++;
       rframe_size = frame_size;
       int endianness = detect_endianness(data, &rframe_size);
-      ID3utf16_to_utf8(data, rframe_size, utf8data, endianness);
+      ID3utf16_to_utf8(data, rframe_size, result.text, endianness);
     } else {
-      strcpy(utf8data, (char *)buffer);
+      strcpy(result.text, (char *)buffer);
     }
 
-    printf("Data: %d, %s\n\n", buffer[0], utf8data);
-    fflush(stdout);
-    if(from_tag != frame_size) {
-      printf("Complete, those was all tag. Exiting...\n");
-      printf("Bytes read: %zu, expected: %d\n", bytes_read, fileref.header.size);
-      return;
+    if(strcmp(result.id, "TIT2") == 0) {
+      tags->title = result;
+    } else if(strcmp(result.id, "TPE1") == 0) {
+      tags->artist = result;
+    } else if(strcmp(result.id, "TALB") == 0) {
+      tags->album = result;
     }
+
   }
   fclose(fp);
 }
@@ -99,12 +106,11 @@ void ID3readHeader(ID3FileRef fileref, ID3Header *header) {
   fclose(fp);
 }
 
-void ID3readFile(const char *path, ID3FileRef *fileref, ID3Header *header, ID3Tag **tags) {
+void ID3readFile(const char *path, ID3FileRef *fileref, ID3Header *header, ID3TagCollection *tags) {
   fileref->full_path = calloc(1, 4096);
   strcpy(fileref->full_path, path);
   ID3readHeader(*fileref, header);
   fileref->header = *header;
   ID3readTags(*fileref, tags);
-  printf("Tag size: %d\n", fileref->header.size);
-  fflush(stdout);
+  fileref->tags = *tags;
 }
