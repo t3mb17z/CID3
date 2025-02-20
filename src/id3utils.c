@@ -29,54 +29,62 @@ void ID3readTags(ID3FileRef fileref, ID3TagCollection *tags) {
     perror("fopen");
     return;
   }
-  int frame_size = 0;
+  int frame_size = 0, from_tag = 0;
   size_t bytes_read = 0;
-  size_t from_tag = 0, header = 0, rframe_size;
+  size_t header = 0, rframe_size;
   unsigned char *buffer;
-  uint16_t *data = calloc(1, 1024);
-  ID3Tag result;
+  char *iso;
+  uint16_t *data = calloc(4097, 1);
+  tags->tags = calloc(128, sizeof(ID3Tag));
+  tags->count = 0;
 
   fseek(fp, HEADER_SIZE, SEEK_SET);
   while(bytes_read < fileref.header.size) {
-    buffer = calloc(1, fileref.header.size);
+    buffer = calloc(1, 10);
     bytes_read += header = fread(buffer, 1, HEADER_SIZE, fp);
     if(header != HEADER_SIZE) {
       fprintf(stderr, "Is not a header, closing...\n");
       return;
     }
-		if(strcmp((char *)buffer, "") == 0)
-			continue;
+    if(strcmp((char *)buffer, "") == 0)
+      continue;
 
-    strncpy(result.id, (char *)buffer, 4);
-    result.id[4] = '\0';
+    strncpy(tags->tags[tags->count].id, (char *)buffer, 4);
+    tags->tags[tags->count].id[4] = '\0';
 
     frame_size = ID3_sync_safe_to_int32(&buffer[4]);
+    buffer = realloc(buffer, frame_size);
 
-    result.size = frame_size;
-    result.text = calloc(1, 256);
-    
+    tags->tags[tags->count].size = frame_size;
+    tags->tags[tags->count].text = calloc(frame_size, 1);
+
     bytes_read += from_tag = fread(buffer, 1, frame_size, fp);
-    if(frame_size < 4096 && ((int)buffer[1] == 0xFE || (int)buffer[1] == 0xFF)) {
-      memcpy(data, buffer, frame_size);
-      data++;
-      if(data[0] == 0xFEFF)
-        data++;
-      if(data[0] == 0xFF)
-        data++;
-      rframe_size = frame_size;
-      int endianness = detect_endianness(data, &rframe_size);
-      ID3utf16_to_utf8(data, rframe_size, result.text, endianness);
-    } else {
-      strcpy(result.text, (char *)buffer);
+    if(from_tag != frame_size) {
+      fprintf(stderr, "Was not the exact framd size\n");
+      return;
     }
 
-    if(strcmp(result.id, "TIT2") == 0) {
-      tags->title = result;
-    } else if(strcmp(result.id, "TPE1") == 0) {
-      tags->artist = result;
-    } else if(strcmp(result.id, "TALB") == 0) {
-      tags->album = result;
+    if(frame_size < 4096) {
+      int encoding = buffer[0];
+      if(encoding == 1 || encoding == 2) {
+        memcpy(data, buffer, frame_size);
+        rframe_size = frame_size;
+        int endianness = detect_endianness(data, &rframe_size);
+        data++;
+        if(data[0] == 0xFEFF)
+          data++;
+        if(data[0] == 0xFF)
+          data++;
+        ID3utf16_to_utf8(data, rframe_size, tags->tags[tags->count].text, endianness);
+      } else if(encoding == 0) {
+        iso = calloc(frame_size, 1);
+        ID3iso8859_1_to_utf8((char *)(buffer++), iso);
+        strcpy(tags->tags[tags->count].text, (char *)iso);
+      } else if(encoding == 3) {
+        strcpy(tags->tags[tags->count].text, (char *)buffer);
+      }
     }
+    tags->count++;
 
   }
   fclose(fp);

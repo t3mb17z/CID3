@@ -19,9 +19,8 @@ typedef struct {
 } ID3Tag;
 
 typedef struct {
-	ID3Tag title;
-	ID3Tag album;
-	ID3Tag artist;
+	ID3Tag *tags;
+	int count;
 } ID3TagCollection;
 
 typedef struct {
