@@ -1,9 +1,9 @@
-#include <id3utils.h>
+#include "id3utils.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strutils.h>
+#include "strutils.h"
 
 int ID3_sync_safe_to_int(unsigned char *syncsafe) {
   return (
@@ -33,14 +33,14 @@ void ID3readTags(ID3FileRef fileref, ID3TagCollection *tags) {
   size_t bytes_read = 0;
   size_t header = 0, rframe_size;
   unsigned char *buffer;
-  char *iso;
+  char *iso, *utf8data;
   uint16_t *data = calloc(4097, 1);
   tags->tags = calloc(128, sizeof(ID3Tag));
   tags->count = 0;
 
   fseek(fp, HEADER_SIZE, SEEK_SET);
   while(bytes_read < fileref.header.size) {
-    buffer = calloc(1, 10);
+    buffer = calloc(HEADER_SIZE, 1);
     bytes_read += header = fread(buffer, 1, HEADER_SIZE, fp);
     if(header != HEADER_SIZE) {
       fprintf(stderr, "Is not a header, closing...\n");
@@ -48,6 +48,8 @@ void ID3readTags(ID3FileRef fileref, ID3TagCollection *tags) {
     }
     if(strcmp((char *)buffer, "") == 0)
       continue;
+
+    printf("Working ON: %s\n", buffer);
 
     strncpy(tags->tags[tags->count].id, (char *)buffer, 4);
     tags->tags[tags->count].id[4] = '\0';
@@ -60,7 +62,7 @@ void ID3readTags(ID3FileRef fileref, ID3TagCollection *tags) {
 
     bytes_read += from_tag = fread(buffer, 1, frame_size, fp);
     if(from_tag != frame_size) {
-      fprintf(stderr, "Was not the exact framd size\n");
+      fprintf(stderr, "Was not the exact frame size\n");
       return;
     }
 
@@ -71,20 +73,28 @@ void ID3readTags(ID3FileRef fileref, ID3TagCollection *tags) {
         rframe_size = frame_size;
         int endianness = detect_endianness(data, &rframe_size);
         data++;
-        if(data[0] == 0xFEFF)
+        if(data[0] == 0xFE01 || data[0] == 0xFEFF)
           data++;
         if(data[0] == 0xFF)
           data++;
-        ID3utf16_to_utf8(data, rframe_size, tags->tags[tags->count].text, endianness);
+        ID3utf16_to_utf8(data, rframe_size, utf8data, endianness);
+        strcpy(tags->tags[tags->count].text, utf8data);
       } else if(encoding == 0) {
         iso = calloc(frame_size, 1);
-        ID3iso8859_1_to_utf8((char *)(buffer++), iso);
+        for(int i = 0; i < frame_size; i++) {
+          int chr = buffer[i];
+          strcat(iso, (char *)&chr);
+        }
+        // ID3iso8859_1_to_utf8((char *)(buffer++), iso);
         strcpy(tags->tags[tags->count].text, (char *)iso);
       } else if(encoding == 3) {
         strcpy(tags->tags[tags->count].text, (char *)buffer);
       }
+      tags->tags[tags->count].encoding = buffer[0];
+      tags->count++;
     }
-    tags->count++;
+
+    free(buffer);
 
   }
   fclose(fp);
@@ -114,11 +124,13 @@ void ID3readHeader(ID3FileRef fileref, ID3Header *header) {
   fclose(fp);
 }
 
-void ID3readFile(const char *path, ID3FileRef *fileref, ID3Header *header, ID3TagCollection *tags) {
+void ID3readFile(const char *path, ID3FileRef *fileref) {
+  ID3Header header;
+  ID3TagCollection tags;
   fileref->full_path = calloc(1, 4096);
   strcpy(fileref->full_path, path);
-  ID3readHeader(*fileref, header);
-  fileref->header = *header;
-  ID3readTags(*fileref, tags);
-  fileref->tags = *tags;
+  ID3readHeader(*fileref, &header);
+  fileref->header = header;
+  ID3readTags(*fileref, &tags);
+  fileref->tags = tags;
 }

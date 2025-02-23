@@ -3,10 +3,10 @@
 #include <string.h>
 
 int detect_endianness(uint16_t *text, size_t *size) {
-  if (text[0] == 0xFEFF) {
+	if (text[0] == 0xFF01) {
     (*size)--;
     return 1; // Big-endian
-  } else if (text[0] == 0xFFFE) {
+  } else if (text[0] == 0xFE01) {
     (*size)--;
     return 0; // Little-endian
   }
@@ -35,9 +35,9 @@ size_t ID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char *utf8, int is_big
   while (i < utf16len) {
     uint16_t code_unit = utf16[i++];
     
-    /*if (is_big_endian) {
+    if (is_big_endian) {
       code_unit = (code_unit >> 8) | (code_unit << 8); // Convertir endianess si es necesario
-    }*/
+    }
     
     if (code_unit >= 0xD800 && code_unit <= 0xDBFF) { // Es un par sustituto (surrogate pair)
       if (i < utf16len) {
@@ -58,11 +58,11 @@ size_t ID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char *utf8, int is_big
     } else if (code_unit <= 0x7FF) { // 2 bytes
       utf8[j++] = (char)(0xC0 | (code_unit >> 6));
       utf8[j++] = (char)(0x80 | (code_unit & 0x3F));
-    } /* else if(code_unit <= 0xFFFF) { // 3 bytes
+    } else if(code_unit <= 0xFFFF) { // 3 bytes
       utf8[j++] = (char)(0xE0 | (code_unit >> 12));
       utf8[j++] = (char)(0xE0 | ((code_unit >> 6) & 0x3F));
       utf8[j++] = (char)(0x80 | (code_unit & 0x3F));
-    }*/
+    }
   }
   
   utf8[j] = '\0';

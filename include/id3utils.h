@@ -16,6 +16,7 @@ typedef struct {
 	char id[5];
 	int size;
 	char *text;
+	int encoding;
 } ID3Tag;
 
 typedef struct {
@@ -33,6 +34,6 @@ typedef struct {
 
 void ID3readTags(ID3FileRef fileref, ID3TagCollection *tag);
 void ID3readHeader(ID3FileRef fileref, ID3Header *header);
-void ID3readFile(const char *path, ID3FileRef *fileref, ID3Header *header, ID3TagCollection *tags);
+void ID3readFile(const char *path, ID3FileRef *fileref);
 
 #endif
