@@ -1,9 +1,9 @@
-#include "id3utils.h"
+#include "utils/id3.h"
+#include "utils/str.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "strutils.h"
 
 int ID3_sync_safe_to_int(unsigned char *syncsafe) {
   return (
@@ -48,8 +48,6 @@ void ID3readTags(ID3FileRef fileref, ID3TagCollection *tags) {
     }
     if(strcmp((char *)buffer, "") == 0)
       continue;
-
-    printf("Working ON: %s\n", buffer);
 
     strncpy(tags->tags[tags->count].id, (char *)buffer, 4);
     tags->tags[tags->count].id[4] = '\0';

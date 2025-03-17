@@ -1,3 +1,4 @@
+#include "utils/str.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,27 +7,11 @@ int detect_endianness(uint16_t *text, size_t *size) {
 	if (text[0] == 0xFF01) {
     (*size)--;
     return 1; // Big-endian
-  } else if (text[0] == 0xFE01) {
+  } else if (text[0] == 0xFE01 || text[0] == 0xFEFF) {
     (*size)--;
     return 0; // Little-endian
   }
   return -1; // No BOM presente
-}
-
-size_t ID3iso8859_1_to_utf8(const char *input, char *output) {
-	size_t i, j = 0;
-	for(i = 0; input[i] != '\0'; i++) {
-		int c = input[i];
-		if(c < 0x80)
-			output[j++] = c;
-		else {
-			output[j++] = 0xC0 | (c >> 6);
-			output[j++] = 0x80 | (c & 0x3F);
-		}
-	}
-	output[j] = '\0';
-
-	return j;
 }
 
 size_t ID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char *utf8, int is_big_endian) {
@@ -60,7 +45,7 @@ size_t ID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char *utf8, int is_big
       utf8[j++] = (char)(0x80 | (code_unit & 0x3F));
     } else if(code_unit <= 0xFFFF) { // 3 bytes
       utf8[j++] = (char)(0xE0 | (code_unit >> 12));
-      utf8[j++] = (char)(0xE0 | ((code_unit >> 6) & 0x3F));
+      utf8[j++] = (char)(0x80 | ((code_unit >> 6) & 0x3F));
       utf8[j++] = (char)(0x80 | (code_unit & 0x3F));
     }
   }
