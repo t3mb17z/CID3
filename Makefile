@@ -1,5 +1,5 @@
 # Nombre del ejecutable final
-TARGET = libctag
+TARGET = libcid3
 PATHLIB = /usr/local/lib
 
 # Directorios
@@ -13,7 +13,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o, $(SRCS))
 
 # Regla principal: compilar todo
 $(TARGET): $(OBJS)
-	$(CC) -shared $(OBJS) -o $(PATHLIB)/$(TARGET).so
+	$(CC) -shared $(OBJS) -o $(BUILD_DIR)/$(TARGET).so
 
 # Regla para compilar archivos .c a .o
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
@@ -26,3 +26,10 @@ $(BUILD_DIR):
 # Limpiar archivos compilados
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
+
+intall:
+	mkdir -p $(PATHLIB)/cid3
+	cp $(BUILD_DIR)/$(TARGET).so $(PATHLIB)/cid3
+
+uninstall:
+	rm -rf $(PATHLIB)/cid3
