@@ -1,3 +1,4 @@
+![logo](logo.png)
 # CID3
 ## A simple and fast ID3v2 library written in C
 
