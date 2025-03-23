@@ -1,6 +1,7 @@
 # Nombre del ejecutable final
 TARGET = libcid3
 PATHLIB = /usr/local/lib
+PATHINC = /usr/local/include/cid3
 
 # Directorios
 SRC_DIR = src
@@ -27,9 +28,12 @@ $(BUILD_DIR):
 clean:
 	rm -rf $(BUILD_DIR) $(TARGET)
 
-intall:
-	mkdir -p $(PATHLIB)/cid3
-	cp $(BUILD_DIR)/$(TARGET).so $(PATHLIB)/cid3
+install:
+	mkdir -p $(PATHLIB)
+	mkdir -p $(PATHINC)
+	cp $(BUILD_DIR)/$(TARGET).so $(PATHLIB)/libcid3.so
+	cp -r include/* -d $(PATHINC)
 
 uninstall:
-	rm -rf $(PATHLIB)/cid3
+	rm -rf $(PATHINC)/cid3
+	rm -rf $(PATHLIB)/libcid3.so

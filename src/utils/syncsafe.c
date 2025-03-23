@@ -1,6 +1,6 @@
 #include <utils/syncsafe.h>
 
-int ID3_sync_safe_to_int(unsigned char *syncsafe) {
+int CID3_sync_safe_to_int(unsigned char *syncsafe) {
   return (
     (syncsafe[0] << 21) |
     (syncsafe[1] << 14) |
@@ -9,7 +9,7 @@ int ID3_sync_safe_to_int(unsigned char *syncsafe) {
   );
 };
 
-int ID3_sync_safe_to_int32(unsigned char *syncsafe) {
+int CID3_sync_safe_to_int32(unsigned char *syncsafe) {
   return (
     (syncsafe[0] << 24) |
     (syncsafe[1] << 16) |

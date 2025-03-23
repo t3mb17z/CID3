@@ -14,7 +14,7 @@ int detect_endianness(const char *text, size_t *size) {
   return -1; // No BOM presente
 }
 
-size_t ID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char **utf8, int is_big_endian) {
+size_t CID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char **utf8, int is_big_endian) {
   size_t i = 0, j = 0;
   
   while (i < utf16len) {
@@ -54,9 +54,9 @@ size_t ID3utf16_to_utf8(uint16_t *utf16, size_t utf16len, char **utf8, int is_bi
   return j;
 }
 
-void ID3proccessFrame(const char *frameData, size_t frameSize, char **output) {
+void CID3proccessFrame(const char *frameData, size_t frameSize, char **output) {
 	size_t i = 0, j = 0;
 	uint16_t *utf16 = (uint16_t *)frameData;
 	int is_big_endian = detect_endianness(frameData, &frameSize);
-	ID3utf16_to_utf8(utf16, frameSize, output, is_big_endian);
+	CID3utf16_to_utf8(utf16, frameSize, output, is_big_endian);
 }
