@@ -35,5 +35,5 @@ install:
 	cp -r include/* -d $(PATHINC)
 
 uninstall:
-	rm -rf $(PATHINC)/cid3
+	rm -rf $(PATHINC)
 	rm -rf $(PATHLIB)/libcid3.so
