@@ -1,5 +1,5 @@
-#ifndef ID3UTILS_H
-#define ID3UTILS_H
+#ifndef ID3_H
+#define ID3_H
 
 #define HEADER_SIZE 10
 #define FRAME_CONTENT 4096
