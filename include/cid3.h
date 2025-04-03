@@ -32,8 +32,8 @@ typedef struct {
 	CID3TagCollection tags;
 } CID3FileRef;
 
-void CID3readTags(CID3FileRef fileref, CID3TagCollection *tag);
-void CID3readHeader(CID3FileRef fileref, CID3Header *header);
-void CID3readFile(const char *path, CID3FileRef *fileref);
+int CID3readTags(CID3FileRef fileref, CID3TagCollection *tag);
+int CID3readHeader(CID3FileRef fileref, CID3Header *header);
+int CID3readFile(const char *path, CID3FileRef *fileref);
 
 #endif
