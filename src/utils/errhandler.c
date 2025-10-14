@@ -3,10 +3,10 @@
 
 char ERRMESSAGE[ERR_MSG_SIZE];
 
-char *CID3getError() {
+char *CID3_GetError() {
 	return ERRMESSAGE;
 }
 
-void CID3setError(char *msg) {
+void CID3_SetError(const char *msg) {
 	strncpy(ERRMESSAGE, msg, ERR_MSG_SIZE);
 }

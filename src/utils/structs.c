@@ -2,7 +2,7 @@
 #include <string.h>
 #include <utils/structs.h>
 
-void deepCopy(CID3Tag *dest, CID3Tag *src) {
+void deepCopy(CID3_Tag *dest, CID3_Tag *src) {
 	if(src->text) {
 		dest->text = calloc(strlen(src->text) + 1, 1);
 		if(dest->text)

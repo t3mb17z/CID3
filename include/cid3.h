@@ -10,30 +10,30 @@ typedef struct {
 	int revision;
 	char flags[4];
 	int size;
-} CID3Header;
+} CID3_Header;
 
 typedef struct {
 	char id[5];
 	int size;
 	char *text;
 	int encoding;
-} CID3Tag;
+} CID3_Tag;
 
 typedef struct {
-	CID3Tag *tags;
+	CID3_Tag *tags;
 	int count;
-} CID3TagCollection;
+} CID3_TagCollection;
 
 typedef struct {
 	char *name;
 	char *parent;
 	char *full_path;
-	CID3Header header;
-	CID3TagCollection tags;
-} CID3FileRef;
+	CID3_Header header;
+	CID3_TagCollection tags;
+} CID3_FileRef;
 
-int CID3readTags(CID3FileRef fileref, CID3TagCollection *tag);
-int CID3readHeader(CID3FileRef fileref, CID3Header *header);
-int CID3readFile(const char *path, CID3FileRef *fileref);
+int CID3_ReadTags(CID3_FileRef **fileref, CID3_TagCollection *tag);
+int CID3_ReadHeader(CID3_FileRef **fileref, CID3_Header *header);
+int CID3_ReadFile(const char *path, CID3_FileRef **fileref);
 
 #endif
